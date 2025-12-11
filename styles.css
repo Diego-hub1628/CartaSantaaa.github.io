@@ -1,0 +1,277 @@
+:root {
+    --envelope-color: #d42426;
+    --envelope-dark: #b81b1d;
+    --flap-color: #e6393b;
+    --gold: #ffc107;
+    --paper: #fffcf5;
+    --font-heading: 'Mountains of Christmas', cursive;
+    --font-body: 'Playfair Display', serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('images/santa_bg.jpg') no-repeat center center/cover;
+    font-family: var(--font-body);
+    overflow: hidden;
+}
+
+.perspective-container {
+    perspective: 1500px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- Envelope Styles --- */
+.envelope {
+    width: 350px;
+    height: 250px;
+    background: var(--envelope-color);
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transition: transform 0.6s ease;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.envelope:hover {
+    transform: scale(1.02);
+}
+
+.flap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 175px solid transparent;
+    border-right: 175px solid transparent;
+    border-top: 140px solid var(--flap-color);
+    transform-origin: top;
+    transition: transform 0.6s ease, z-index 0.6s;
+    z-index: 6;
+    /* On top when closed */
+}
+
+.pocket {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 175px solid transparent;
+    border-right: 175px solid transparent;
+    border-bottom: 150px solid var(--envelope-dark);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.front-label {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    text-align: center;
+    z-index: 7;
+    transition: opacity 0.3s;
+}
+
+.front-label p {
+    font-family: var(--font-heading);
+    color: var(--gold);
+    font-size: 2rem;
+    margin: 0 0 10px 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.open-btn {
+    background: var(--gold);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+}
+
+/* --- Letter Styles --- */
+.letter {
+    position: absolute;
+    bottom: 0;
+    left: 17.5px;
+    width: 315px;
+    /* Slightly smaller than envelope */
+    height: 240px;
+    background: var(--paper);
+    padding: 20px;
+    box-sizing: border-box;
+    /* Remove 'all' transition to avoid fighting with JS FLIP */
+    transition: box-shadow 0.5s;
+    z-index: 3;
+    /* Inside envelope */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* Origin for scaling */
+    transform-origin: center center;
+}
+
+.letter-content {
+    opacity: 0;
+    /* Hidden until fully open */
+    transition: opacity 0.5s;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.letter-header h1 {
+    font-family: var(--font-heading);
+    color: var(--envelope-color);
+    text-align: center;
+    margin: 10px 0;
+    font-size: 1.8rem;
+}
+
+.gift-image {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.text-section p {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.details-box {
+    background: #fff;
+    border: 1px dashed var(--envelope-color);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* --- Snow Animation --- */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image:
+        radial-gradient(4px 4px at 100px 50px, #fff, transparent),
+        radial-gradient(6px 6px at 200px 150px, #fff, transparent),
+        radial-gradient(3px 3px at 300px 250px, #fff, transparent);
+    background-size: 650px 650px;
+    animation: snow 3s linear infinite;
+    opacity: 0.6;
+    z-index: 100;
+}
+
+@keyframes snow {
+    0% {
+        background-position: 0px 0px, 0px 0px, 0px 0px;
+    }
+
+    100% {
+        background-position: 500px 1000px, 400px 400px, 300px 300px;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* --- OPEN STATES --- */
+
+/* 1. Flap Opens */
+.envelope.open .flap {
+    transform: rotateX(180deg);
+    z-index: 1;
+    /* Moves behind the letter as it rises */
+}
+
+/* 2. Hide Label */
+.envelope.open .front-label {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 3. Letter Slides Up (Initial Phase) */
+.envelope.open .letter {
+    /* We handle movement via JS or simple transform, but here we just raise it slightly via CSS before JS takes over?
+       Actually, let's let CSS handle the "slide up" phase, then JS handles the "expand" phase.
+    */
+    transform: translateY(-100px);
+    /* Move up visually */
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 4;
+}
+
+/* 4. Fullscreen Expansion */
+body.fullscreen-mode .envelope {
+    /* No transform changes to avoid breaking fixed context, but we hide children */
+}
+
+/* HIDE envelope parts so they don't overlap the fullscreen letter */
+body.fullscreen-mode .pocket,
+body.fullscreen-mode .flap,
+body.fullscreen-mode .front-label {
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+}
+
+/* 4. Fullscreen Expansion Destination */
+body.fullscreen-mode .letter {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    /* Destination interactable state */
+    width: 90vw;
+    height: 80vh;
+    max-width: 600px;
+    z-index: 50;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    /* We add a transition for the expansion phase */
+    transition: transform 0.8s cubic-bezier(0.2, 0, 0.2, 1), width 0.8s, height 0.8s, top 0.8s, left 0.8s;
+}
+
+body.fullscreen-mode .letter-content {
+    opacity: 1;
+}
+
+/* Dim background when fullscreen */
+body.fullscreen-mode::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 40;
+}
