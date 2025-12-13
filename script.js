@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. First: Get current position/size
         const first = letter.getBoundingClientRect();
 
+        // MOVEMENT: Move letter to body to escape stacking contexts
+        document.body.appendChild(letter);
+
         // 2. Last: Apply class to set final state
         document.body.classList.add('fullscreen-mode');
 
